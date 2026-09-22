@@ -3,6 +3,7 @@
 (function(){
   'use strict';
 
+  // ===== COOKIE BANNER =====
   var cookieBanner = document.getElementById('cookie-banner');
   if (cookieBanner && !localStorage.getItem('cookieConsent')) {
     cookieBanner.style.display = 'flex';
@@ -16,6 +17,7 @@
     });
   }
 
+  // ===== BACK TO TOP =====
   var header = document.getElementById('header');
   var backToTop = document.getElementById('back-to-top');
   window.addEventListener('scroll', function() {
@@ -25,38 +27,49 @@
     if (window.scrollY > umbralScroll) backToTop.classList.add('show');
     else backToTop.classList.remove('show');
   });
-
   if (backToTop) {
     backToTop.addEventListener('click', function(){
       window.scrollTo({top:0, behavior:'smooth'});
     });
   }
 
-  window.replyToComment = function(button) {
-    var commentId = button.getAttribute('data-comment-id');
-    var author = button.getAttribute('data-comment-author');
-    var notice = document.getElementById('reply-notice');
-    var authorSpan = document.getElementById('reply-author-name');
-    var editor = document.getElementById('comment-editor');
-    var formSrc = document.getElementById('comment-editor-src') ? document.getElementById('comment-editor-src').href : null;
-
-    if (notice && authorSpan && editor && formSrc) {
-      authorSpan.textContent = 'Respondiendo a ' + author;
-      notice.classList.add('show');
-      editor.src = formSrc + '&parentID=' + commentId;
-      editor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // ===== UTILIDAD GLOBAL: FILTRAR ETIQUETAS PERMITIDAS =====
+  window.getAllowedTag = function(categories) {
+    var allowed = ['PSP', 'APK', 'PC', 'IOS'];
+    for (var i = 0; i < categories.length; i++) {
+      var c = categories[i].trim().toUpperCase();
+      if (allowed.indexOf(c) !== -1) return c;
     }
+    return '';
   };
 
-  window.cancelReply = function() {
-    var notice = document.getElementById('reply-notice');
-    var editor = document.getElementById('comment-editor');
-    var formSrc = document.getElementById('comment-editor-src') ? document.getElementById('comment-editor-src').href : null;
+  // ===== WIDGET WHATSAPP (tooltip) =====
+  document.addEventListener("DOMContentLoaded", function() {
+    var btn = document.querySelector("#whatsapp-floating-widget a");
+    var tooltip = document.querySelector("#whatsapp-floating-widget .tooltip");
+    var shown = false;
+    var timer;
+    if (!btn || !tooltip) return;
 
-    if (notice && editor && formSrc) {
-      notice.classList.remove('show');
-      editor.src = formSrc;
+    function showTooltip() {
+      tooltip.style.visibility = "visible";
+      tooltip.style.opacity = "1";
+      tooltip.style.left = window.innerWidth <= 768 ? "70px" : "85px";
     }
-  };
+    function hideTooltip() {
+      tooltip.style.opacity = "0";
+      tooltip.style.visibility = "hidden";
+    }
+    timer = setTimeout(function() {
+      if (!shown) { showTooltip(); shown = true; setTimeout(hideTooltip, 5000); }
+    }, 10000);
+    btn.addEventListener("mouseenter", function() { clearTimeout(timer); showTooltip(); });
+    btn.addEventListener("mouseleave", function() { hideTooltip(); });
+    btn.addEventListener("click", function() {
+      hideTooltip();
+      shown = true;
+      clearTimeout(timer);
+    });
+  });
 
 })();
